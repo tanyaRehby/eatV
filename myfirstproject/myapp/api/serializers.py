@@ -1,9 +1,9 @@
 from rest_framework.serializers import ModelSerializer
-from myapp.models import Journey
+from myapp.models import Place
 import json
 
-class JourneySerializer(ModelSerializer):
+class placeSerializer(ModelSerializer):
     class Meta:
-        model = Journey
+        model = Place
         fields = '__all__'
         

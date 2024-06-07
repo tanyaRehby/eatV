@@ -1,22 +1,61 @@
 from django.db import models
-import json
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.validators import RegexValidator
+from django.contrib.contenttypes.models import ContentType
+from django.core.validators import MinValueValidator, MaxValueValidator
 
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import BaseUserManager
- 
+
+class Place(models.Model):
+    place_name = models.CharField(max_length=100, primary_key=True)
+    city = models.CharField(max_length=100)
+    address = models.CharField(max_length=255)
+    category_choices = [
+        ('Italian', 'Italian'),
+        ('Chinese', 'Chinese'),
+        ('Mexican', 'Mexican'),
+        ('Gril', 'Gril'),
+        ('Meat', 'Meat'),
+        ('Seafood', 'Seafood'),
+        ('Vegetarian', 'Vegetarian'),
+        ('Vegan', 'Vegan'),
+        ('Fast_food', 'Fast Food'),
+        ('Dessert', 'Dessert'),
+        ('Cafe', 'Cafe'),
+        ('Bar', 'Bar'),
+        ('Pub', 'Pub'),
+        ('Brewery', 'Brewery'),
+        ('Steakhouse', 'Steakhouse'),
+        ('Sushi', 'Sushi'),
+        ('Food_truck', 'Food Truck'),
+        ('Bakery', 'Bakery'),
+        ('Deli', 'Deli'),
+        ('Juice_bar', 'Juice Bar'),
+        ('Asian', 'Asian'),
+        ('Vietnamese','Vietnamese'),
+        ('Morrocan','Morrocan'),
+    ]
+    category = models.CharField(max_length=100, choices=category_choices)
+    is_cosher = models.BooleanField(default=False)
+    has_vegan_option = models.BooleanField(default=False)
+    recommended_dishes = models.TextField(blank=True)
+    image = models.ImageField(upload_to='place_images/', default='')
+    link = models.URLField(max_length=200, blank=True, null=True)
+    rate = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)]) 
+    def __str__(self):
+        return self.place_name
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email, full_name, password=None, **extra_fields):
         if not email:
             raise ValueError('The Email field must be set')
-        email = self.normalize_email(email)  # Ensure email is normalized
-        user = self.model(email=email, **extra_fields)
+        email = self.normalize_email(email)
+        user = self.model(email=email, full_name=full_name, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email, full_name, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
@@ -25,54 +64,30 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self.create_user(email, password, **extra_fields)
+        return self.create_user(email, full_name, password, **extra_fields)
 
-
-
-class Users(AbstractBaseUser):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
+class User(AbstractBaseUser, PermissionsMixin):
+    full_name = models.CharField(max_length=150)
+    email = models.EmailField(unique=True, primary_key=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    REQUIRED_FIELDS = ['full_name']
+
+    objects = CustomUserManager()
 
     def __str__(self):
-        return f"ID: {self.pk}, Email: {self.email}, Name: {self.first_name} {self.last_name}"
+        return self.email
 
 
-
-
-class Journey(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    user_creator = models.ForeignKey(Users, on_delete=models.CASCADE)
-    journey_name = models.CharField(max_length=100)
-    description = models.TextField()
-    duration = models.PositiveBigIntegerField()
-    steps = models.PositiveIntegerField()
-    category = models.TextField()
-    image_url = models.URLField(default='')
-    def set_category(self, category_list):
-        self.category = json.dumps(category_list)
-
-    def get_category(self):
-        try:
-            return json.loads(self.category)
-        except json.JSONDecodeError:
-            return []
+class FoodSupplier(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    name = models.CharField(max_length=100)
+    place = models.ForeignKey(Place, on_delete=models.CASCADE)
+    supplier_email = models.EmailField(unique=True)
+    supplier_password = models.CharField(max_length=128,
+                                          validators=[RegexValidator('^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$')])
 
     def __str__(self):
-        return f"ID: {self.id}, Name: {self.journey_name} (Category: {', '.join(self.get_category())})"
-   
-
-
-class Register_to_journey(models.Model):
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    journey = models.ForeignKey(Journey, on_delete=models.CASCADE)
-    progress = models.PositiveIntegerField()
-
-    def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name} - {self.journey.journey_name}"
+        return self.name
