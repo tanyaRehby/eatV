@@ -2,9 +2,36 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import placeSerializer, LocationSerializer, ReverseGeocodeSerializer
-from myapp.models import Place
+from myapp.models import Place, User, CustomUserManager
 import requests
 from rest_framework.views import APIView
+
+from django.shortcuts import render
+from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def login_view(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        email = data.get("email")
+        password = data.get("password")
+        user = authenticate(request, email=email, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({"status": "success", "user": user.email})
+        else:
+            return JsonResponse({"status": "fail", "message": "Invalid credentials"}, status=400)
+
+@csrf_exempt
+def password_reset_view(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        email = data.get("email")
+        # Add your password reset logic here
+        return JsonResponse({"status": "success", "message": "Email has been sent to you"})
 
 class GeocodeView(APIView):
     def post(self, request):

@@ -10,6 +10,8 @@ from .views import GeocodeView, ReverseGeocodeView
 
 urlpatterns = [
     path('',views.getRoutes),
+    path('login/', views.login_view, name='login'),
+    path('password_reset/', views.password_reset_view, name='password_reset'),
     path('places/', views.getPlaces),
     path('places/create', views.createPlace),
     path('geocode/', GeocodeView.as_view(), name='geocode'),
