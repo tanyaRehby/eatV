@@ -66,12 +66,12 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(email, full_name, password, **extra_fields)
 
-    def __str__(self):
-        return self.email
     
 class User (AbstractBaseUser, PermissionsMixin):
-    full_name = models.CharField(max_length=150)
     email = models.EmailField(unique=True, primary_key=True)
+    full_name = models.CharField(max_length=150)
+    is_business_owner = models.BooleanField(default=False)  
+    business_name = models.CharField(max_length=255, blank=True, null=True) 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
