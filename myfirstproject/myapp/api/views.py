@@ -31,7 +31,7 @@ def getRoutes(request):
                 'POST /api/geocode/',
                 'POST /api/reverse-geocode/',
                 'POST /api/signup/',
-                'POST /api/login',
+                'GET /api/login',
             ]
         }
         return Response(data)
@@ -40,32 +40,41 @@ def getRoutes(request):
         posted_data = request.data
         return Response({'message': 'Data received', 'data': posted_data}, status=status.HTTP_201_CREATED)
     
-
-
 class LoginView(APIView):
-    def post(self, request, *args, **kwargs):
-        print("back 1")
-        serializer = self.serializer_class(data=request.data)
+    serializer_class = LoginSerializer
+
+    def get(self, request, *args, **kwargs):
+        print("backend LoginView")
+        serializer = self.serializer_class(data=request.query_params)
+        print("step0")
         if serializer.is_valid():
+            print("step1")
             user = serializer.validated_data
             return Response({
-               "user": UserSerializer(user).data,
-               "message": "Login successful"
+                "user": UserSerializer(user).data,
+                "message": "Login successful"
             }, status=status.HTTP_200_OK)
+        print("step3")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class SignupView(APIView):
     permission_classes = [AllowAny]
     serializer_class = SignupSerializer
 
     def post(self, request, *args, **kwargs):
+        print("SignupView 0")
         serializer = self.serializer_class(data=request.data)
+        print("data is ", request.data)
+
         if serializer.is_valid():
+            print("SignupView 2")
             user = serializer.save()
             return Response({
                 "user": UserSerializer(user).data,
                 "message": "Signup successful"
             }, status=status.HTTP_201_CREATED)
+        print("SignupView 3")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @csrf_exempt
@@ -82,19 +91,20 @@ class GeocodeView(APIView):
         if serializer.is_valid():
             address = serializer.validated_data['address']
             api_key = 'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'  # Replace with your actual API key
-            url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'}'
+            url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'}"
             response = requests.get(url)
             return Response(response.json(), status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ReverseGeocodeView(APIView):
-    def post(self, request):
+    def get(self, request):
+        print("backend 11")
         serializer = ReverseGeocodeSerializer(data=request.data)
         if serializer.is_valid():
             lat = serializer.validated_data['lat']
             lng = serializer.validated_data['lng']
             api_key = 'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'  # Replace with your actual API key
-            url = f'https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lng}&key={'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'}'
+            url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lng}&key={'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'}"
             response = requests.get(url)
             return Response(response.json(), status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -104,7 +114,9 @@ class ReverseGeocodeView(APIView):
 @api_view(['GET'])
 def getPlaces(request):
     places = Place.objects.all()
+    print(places)
     serializer = placeSerializer(places, many=True)
+    print(serializer.data)
     return Response(serializer.data)
 
 @api_view(['POST'])
