@@ -1,48 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.core.validators import RegexValidator
-from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MinValueValidator, MaxValueValidator
-
-
-class Place(models.Model):
-    place_name = models.CharField(max_length=100, primary_key=True)
-    city = models.CharField(max_length=100)
-    address = models.CharField(max_length=255)
-    category_choices = [
-        ('Italian', 'Italian'),
-        ('Chinese', 'Chinese'),
-        ('Mexican', 'Mexican'),
-        ('Gril', 'Gril'),
-        ('Meat', 'Meat'),
-        ('Seafood', 'Seafood'),
-        ('Vegetarian', 'Vegetarian'),
-        ('Vegan', 'Vegan'),
-        ('Fast_food', 'Fast Food'),
-        ('Dessert', 'Dessert'),
-        ('Cafe', 'Cafe'),
-        ('Bar', 'Bar'),
-        ('Pub', 'Pub'),
-        ('Brewery', 'Brewery'),
-        ('Steakhouse', 'Steakhouse'),
-        ('Sushi', 'Sushi'),
-        ('Food_truck', 'Food Truck'),
-        ('Bakery', 'Bakery'),
-        ('Deli', 'Deli'),
-        ('Juice_bar', 'Juice Bar'),
-        ('Asian', 'Asian'),
-        ('Vietnamese','Vietnamese'),
-        ('Morrocan','Morrocan'),
-    ]
-    category = models.CharField(max_length=100, choices=category_choices)
-    is_cosher = models.BooleanField(default=False)
-    has_vegan_option = models.BooleanField(default=False)
-    recommended_dishes = models.TextField(blank=True)
-    image = models.ImageField(upload_to='place_images/', default='')
-    link = models.URLField(max_length=200, blank=True, null=True)
-    rate = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)]) 
-    def __str__(self):
-        return self.place_name
 
 
 class CustomUserManager(BaseUserManager):
@@ -71,10 +29,10 @@ class User (AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, primary_key=True)
     full_name = models.CharField(max_length=150)
     is_business_owner = models.BooleanField(default=False)  
-    business_name = models.CharField(max_length=255, blank=True, null=True) 
-    is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-
+    is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True) 
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['full_name']
 
@@ -84,13 +42,47 @@ class User (AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-class FoodSupplier(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    name = models.CharField(max_length=100)
-    place = models.ForeignKey(Place, on_delete=models.CASCADE)
-    supplier_email = models.EmailField(unique=True)
-    supplier_password = models.CharField(max_length=128,
-                                          validators=[RegexValidator('^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$')])
-
+class Place(models.Model):
+    id = models.AutoField(primary_key=True, default=1)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='places', default='reutdimri24@gmail.com')
+    place_name = models.CharField(max_length=100)
+    city = models.CharField(max_length=100)
+    address = models.CharField(max_length=255)
+    longitude = models.FloatField(default=1)
+    latitude = models.FloatField(default=1)
+    category_choices = [
+        ('Israeli', 'Israeli'),
+        ('Italian', 'Italian'),
+        ('Chinese', 'Chinese'),
+        ('Mexican', 'Mexican'),
+        ('Grill', 'Grill'),
+        ('Meat', 'Meat'),
+        ('Seafood', 'Seafood'),
+        ('Vegetarian', 'Vegetarian'),
+        ('Vegan', 'Vegan'),
+        ('Fast_food', 'Fast Food'),
+        ('Dessert', 'Dessert'),
+        ('Cafe', 'Cafe'),
+        ('Bar', 'Bar'),
+        ('Pub', 'Pub'),
+        ('Brewery', 'Brewery'),
+        ('Steakhouse', 'Steakhouse'),
+        ('Sushi', 'Sushi'),
+        ('Food_truck', 'Food Truck'),
+        ('Bakery', 'Bakery'),
+        ('Deli', 'Deli'),
+        ('Juice_bar', 'Juice Bar'),
+        ('Asian', 'Asian'),
+        ('Vietnamese','Vietnamese'),
+        ('Morrocan','Morrocan'),
+    ]
+    food_category = models.CharField(max_length=100, choices=category_choices, default='Israeli')
+    is_kosher = models.BooleanField(default=False)
+    has_vegan_option = models.BooleanField(default=False)
+    recommended_dishes = models.TextField(blank=True)
+    image = models.ImageField(upload_to='place_images/', default='',blank=True, null=True)
+    link = models.URLField(max_length=200, blank=True, null=True)
     def __str__(self):
-        return self.name
+        return self.place_name
+
+

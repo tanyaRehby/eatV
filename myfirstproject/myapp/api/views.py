@@ -1,7 +1,8 @@
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, generics
-from .serializers import LoginSerializer, SignupSerializer, placeSerializer, LocationSerializer, ReverseGeocodeSerializer, UserSerializer
+from .serializers import LoginSerializer, SignupSerializer, PlaceSerializer, LocationSerializer, ReverseGeocodeSerializer, UserSerializer
 from myapp.models import Place, User, CustomUserManager
 import requests
 from rest_framework.views import APIView
@@ -15,6 +16,22 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
+
+
+@api_view(['POST'])
+def register(request):
+    user_serializer = SignupSerializer(data=request.data)
+    place_serializer = None
+
+    if 'is_business_owner' in request.data and request.data['is_business_owner'] == 'True':
+        place_serializer = PlaceSerializer(data=request.data)
+
+    if user_serializer.is_valid() and (place_serializer is None or place_serializer.is_valid()):
+        user = user_serializer.save()
+        if place_serializer:
+            place = place_serializer.save(user=user)
+        return Response({"detail": "User registered successfully"}, status=status.HTTP_201_CREATED)
+    return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 ##api.route('api/login/' , methods =['GET'])
@@ -41,19 +58,20 @@ def getRoutes(request):
         return Response({'message': 'Data received', 'data': posted_data}, status=status.HTTP_201_CREATED)
     
 
-
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
+
     def post(self, request, *args, **kwargs):
-        print("back 1")
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data
             return Response({
-               "user": UserSerializer(user).data,
-               "message": "Login successful"
+                "user": UserSerializer(user).data,
+                "message": "Login successful"
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
 class SignupView(APIView):
     permission_classes = [AllowAny]
     serializer_class = SignupSerializer
@@ -104,12 +122,12 @@ class ReverseGeocodeView(APIView):
 @api_view(['GET'])
 def getPlaces(request):
     places = Place.objects.all()
-    serializer = placeSerializer(places, many=True)
+    serializer = PlaceSerializer(places, many=True)
     return Response(serializer.data)
 
 @api_view(['POST'])
 def createPlace(request):
-    serializer = placeSerializer(data=request.data)
+    serializer = PlaceSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
