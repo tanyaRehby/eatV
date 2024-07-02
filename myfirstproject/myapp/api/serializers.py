@@ -15,6 +15,7 @@ class SignupSerializer(serializers.ModelSerializer):
         fields = ['email', 'full_name', 'password', 'is_business_owner']
 
     def create(self, validated_data):
+        print(validated_data['email'])
         user = User.objects.create(
             email=validated_data['email'],
             full_name=validated_data['full_name'],
@@ -34,8 +35,11 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
+        print("val1")
         user = authenticate(email=data['email'], password=data['password'])
+        print(user)
         if user and user.is_active:
+            print("error")
             return user
         raise serializers.ValidationError("Invalid credentials")
 

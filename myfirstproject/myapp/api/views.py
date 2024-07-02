@@ -63,13 +63,17 @@ class LoginView(APIView):
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
+        print("11")
         serializer = self.serializer_class(data=request.data)
+        print("22")
         if serializer.is_valid():
+            print(request.data)
             user = serializer.validated_data
             return Response({
                 "user": UserSerializer(user).data,
                 "message": "Login successful"
             }, status=status.HTTP_200_OK)
+        print("44")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class SignupView(APIView):
@@ -78,12 +82,16 @@ class SignupView(APIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
+        print("1")
+        print(request.data)
         if serializer.is_valid():
+            print("2")
             user = serializer.save()
             return Response({
                 "user": UserSerializer(user).data,
                 "message": "Signup successful"
             }, status=status.HTTP_201_CREATED)
+        print("3")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @csrf_exempt
@@ -100,7 +108,7 @@ class GeocodeView(APIView):
         if serializer.is_valid():
             address = serializer.validated_data['address']
             api_key = 'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'  # Replace with your actual API key
-            url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'}'
+            url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}"
             response = requests.get(url)
             return Response(response.json(), status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -112,7 +120,7 @@ class ReverseGeocodeView(APIView):
             lat = serializer.validated_data['lat']
             lng = serializer.validated_data['lng']
             api_key = 'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'  # Replace with your actual API key
-            url = f'https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lng}&key={'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'}'
+            url = f'https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lng}&key={api_key}'
             response = requests.get(url)
             return Response(response.json(), status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
