@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, full_name, password=None, **extra_fields):
         if not email:
@@ -43,13 +42,13 @@ class User (AbstractBaseUser, PermissionsMixin):
 
 
 class Place(models.Model):
-    id = models.AutoField(primary_key=True, default=1)
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='places', default='reutdimri24@gmail.com')
     place_name = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
-    longitude = models.FloatField(default=1)
-    latitude = models.FloatField(default=1)
+    longitude = models.FloatField(null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
     category_choices = [
         ('Israeli', 'Israeli'),
         ('Italian', 'Italian'),
