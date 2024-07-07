@@ -14,8 +14,11 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
+
 
 load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,19 +26,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-vbv!we0_xx4cps@)m00ceqoi_y5ivm-iu)#!-*%-(1+fv++88u'
+#SECRET_KEY = 'django-insecure-vbv!we0_xx4cps@)m00ceqoi_y5ivm-iu)#!-*%-(1+fv++88u'
 SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured("The SECRET_KEY setting must not be empty.")
+print(f"Loaded SECRET_KEY: {SECRET_KEY}")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
+print(f"Loaded DEBUG: {DEBUG}")
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+print(f"Loaded ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 
-ALLOWED_HOSTS = [
-    'eat-venture-d1e1517b714d.herokuapp.com',
-    '127.0.0.1',
-    'localhost'
-]
+# ALLOWED_HOSTS = [
+#     'eat-venture-d1e1517b714d.herokuapp.com',
+#     '127.0.0.1',
+#     'localhost'
+# ]
 
 
 # Application definition
