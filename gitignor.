@@ -1,0 +1,12 @@
+# קבצים ותיקיות להחרגה מהעלאה ל-Git
+*.pyc
+__pycache__/
+db.sqlite3
+/staticfiles/
+/media/
+
+# הוספת החרגה לקובץ .env
+.env
+
+# My environments
+myenv/
