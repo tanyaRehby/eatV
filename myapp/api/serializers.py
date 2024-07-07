@@ -37,7 +37,7 @@ class PlaceSerializer(serializers.ModelSerializer):
         address = validated_data['address']
         city=validated_data['city']
         full_address = f"{address}, {city}"
-        api_key = 'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco'
+        api_key = 'AIzaSyAJLe6L_bHnzqC6K3YO0ET_iw7D1gmo07I'
         url = f'https://maps.googleapis.com/maps/api/geocode/json?address={full_address}&key={api_key}'
         response = requests.get(url)
         response_data = response.json()

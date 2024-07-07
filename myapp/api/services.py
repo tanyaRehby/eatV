@@ -6,10 +6,10 @@ import googlemaps
 from datetime import datetime
 import random
 
-gmaps= googlemaps.Client( key= 'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco' )
+gmaps= googlemaps.Client( key= 'AIzaSyAJLe6L_bHnzqC6K3YO0ET_iw7D1gmo07I' )
 
 def geocode_address(address):
-    api_key = 'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco' 
+    api_key = 'AIzaSyAJLe6L_bHnzqC6K3YO0ET_iw7D1gmo07I' 
     url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}'
     response = requests.get(url)
     if response.status_code == 200:
@@ -49,7 +49,7 @@ def plan_tour(user_address, kosher=False, vegan=False, num_stops=5):
 
     waypoints = [f"{place.latitude},{place.longitude}" for place in filtered_places[:num_stops]]
 
-    api_key = 'AIzaSyCXA-2ogmX_O4eFcyXUqto6LFOHwzMwLco' 
+    api_key = 'AIzaSyAJLe6L_bHnzqC6K3YO0ET_iw7D1gmo07I' 
     
     print(user_lat)
     print(user_lng)

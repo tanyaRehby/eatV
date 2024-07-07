@@ -15,21 +15,28 @@ import os
 import dj_database_url
 from dotenv import load_dotenv
 
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
+SECRET_KEY = 'django-insecure-vbv!we0_xx4cps@)m00ceqoi_y5ivm-iu)#!-*%-(1+fv++88u'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['your-heroku-app.herokuapp.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+
+ALLOWED_HOSTS = [
+    'eat-venture-d1e1517b714d.herokuapp.com',
+    '127.0.0.1',
+    'localhost'
+]
+
 
 # Application definition
 
@@ -168,4 +175,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Other settings
 APPEND_SLASH = False
+GOOGLE_API_KEY = 'AIzaSyAJLe6L_bHnzqC6K3YO0ET_iw7D1gmo07I'
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', 'default_google_api_key')
+
