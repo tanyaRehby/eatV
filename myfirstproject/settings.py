@@ -15,7 +15,9 @@ import os
 import dj_database_url
 from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
+import django_heroku
 
+django_heroku.settings(locals())
 
 load_dotenv()
 

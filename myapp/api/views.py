@@ -49,26 +49,14 @@ class SignupView(APIView):
     serializer_class = SignupSerializer
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
-        print("11")
         print(request.data)
         if serializer.is_valid():
-            print("22")
             user = serializer.save()
             return Response({
                 "user": UserSerializer(user).data,
                 "message": "Signup successful"
             }, status=status.HTTP_201_CREATED)
-        print("33")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# @csrf_exempt
-# def password_reset_view(request):
-#     if request.method == "POST":
-#         data = json.loads(request.body)
-#         email = data.get("email")
-#         # Add your password reset logic here
-#         return JsonResponse({"status": "success", "message": "Email has been sent to you"})
 
 class GeocodeView(APIView):
     def post(self, request):
