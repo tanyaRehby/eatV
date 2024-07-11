@@ -10,7 +10,9 @@ djangorestframework-simplejwt==5.3.1
 geographiclib==2.0
 geopy==2.4.1
 googlemaps==4.10.0
+gunicorn==22.0.0
 idna==3.7
+packaging==24.1
 pillow==10.4.0
 PyJWT==2.8.0
 python-dotenv==1.0.1
