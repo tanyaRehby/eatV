@@ -40,7 +40,7 @@ def filter(user_lat, user_lng, kosher, vegan, max_distance_km):
 
 def plan_tour(user_address, kosher=False, vegan=False, num_stops=5):
     user_lat, user_lng = geocode_address(user_address)
-    filtered_places = filter(user_lat, user_lng, kosher, vegan, 50)
+    filtered_places = filter(user_lat, user_lng, kosher, vegan, 3)
     random.shuffle(filtered_places)
     
     if len(filtered_places) < num_stops:

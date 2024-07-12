@@ -43,37 +43,18 @@ class User (AbstractBaseUser, PermissionsMixin):
 
 class Place(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='places', default='reutdimri24@gmail.com')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='places')
     place_name = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
     longitude = models.FloatField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     category_choices = [
-        ('Israeli', 'Israeli'),
-        ('Italian', 'Italian'),
-        ('Chinese', 'Chinese'),
-        ('Mexican', 'Mexican'),
-        ('Grill', 'Grill'),
-        ('Meat', 'Meat'),
-        ('Seafood', 'Seafood'),
-        ('Vegetarian', 'Vegetarian'),
-        ('Vegan', 'Vegan'),
-        ('Fast_food', 'Fast Food'),
-        ('Dessert', 'Dessert'),
-        ('Cafe', 'Cafe'),
-        ('Bar', 'Bar'),
-        ('Pub', 'Pub'),
-        ('Brewery', 'Brewery'),
-        ('Steakhouse', 'Steakhouse'),
-        ('Sushi', 'Sushi'),
-        ('Food_truck', 'Food Truck'),
-        ('Bakery', 'Bakery'),
-        ('Deli', 'Deli'),
-        ('Juice_bar', 'Juice Bar'),
-        ('Asian', 'Asian'),
-        ('Vietnamese','Vietnamese'),
-        ('Morrocan','Morrocan'),
+        ('Israeli', 'Israeli'), ('Italian', 'Italian'), ('Chinese', 'Chinese'), ('Mexican', 'Mexican'), ('Grill', 'Grill'),
+        ('Meat', 'Meat'), ('Seafood', 'Seafood'), ('Vegetarian', 'Vegetarian'), ('Vegan', 'Vegan'), ('Fast_food', 'Fast Food'),
+        ('Dessert', 'Dessert'), ('Cafe', 'Cafe'), ('Bar', 'Bar'), ('Pub', 'Pub'), ('Brewery', 'Brewery'),
+        ('Steakhouse', 'Steakhouse'), ('Sushi', 'Sushi'), ('Food_truck', 'Food Truck'), ('Bakery', 'Bakery'),
+        ('Deli', 'Deli'), ('Juice_bar', 'Juice Bar'), ('Asian', 'Asian'), ('Vietnamese','Vietnamese'), ('Morrocan','Morrocan'),
     ]
     food_category = models.CharField(max_length=100, choices=category_choices, default='Israeli')
     is_kosher = models.BooleanField(default=False)

@@ -13,6 +13,8 @@ import json
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from .services import plan_tour
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 User = get_user_model()
 
@@ -92,12 +94,19 @@ def getPlaces(request):
 
 @api_view(['POST'])
 def createPlace(request):
-    serializer = PlaceSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    try:
+        print("Received data:", request.data)
+        serializer = PlaceSerializer(data=request.data)
+        if serializer.is_valid():
+            place = serializer.save()
+            print("Place created successfully:", place)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            print("Validation errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print("Exception occurred:", str(e))
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class tourView(APIView):
     def post(self, request):
