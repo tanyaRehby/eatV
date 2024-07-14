@@ -14,12 +14,12 @@ gmaps = googlemaps.Client(key='AIzaSyB6dFwZLE-e9h_aoAWVXj-zOsbYe4KZaEg')
 
 def geocode_address(address):
     api_key = os.getenv('GOOGLE_MAPS_API_KEY')
-    print(f"Using API Key: {api_key}")  # הדפסת מפתח ה-API
+    print(f"Using API Key: {api_key}")  
     url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}'
-    print(f"Geocode URL: {url}")  # הדפסת ה-URL המלא
+    print(f"Geocode URL: {url}")  
     response = requests.get(url)
     response_data = response.json()
-    print(f"Geocode response: {response_data}")  # הדפסת התגובה מ-API
+    print(f"Geocode response: {response_data}")  
 
     if response.status_code == 200:
         if response_data['status'] == 'OK':
@@ -29,6 +29,7 @@ def geocode_address(address):
             raise Exception(f"Geocoding error: {response_data['status']} - {response_data.get('error_message', 'Unknown error')}")
     else:
         raise Exception(f"HTTP error: {response.status_code}")
+
 
 def filter_places(user_lat, user_lng, kosher, vegan, max_distance_km):
     places = Place.objects.all()
@@ -44,6 +45,7 @@ def filter_places(user_lat, user_lng, kosher, vegan, max_distance_km):
             filtered_places.append(place)
     
     return filtered_places
+
 
 def plan_tour(user_address, kosher=False, vegan=False, num_stops=5):
     user_lat, user_lng = geocode_address(user_address)
@@ -63,6 +65,7 @@ def plan_tour(user_address, kosher=False, vegan=False, num_stops=5):
     print(f"waypoint_order: {waypoint_order}")
     optimal_route_places = [filtered_places[i] for i in waypoint_order]
     return optimal_route_places
+
 
 class TourView(APIView):
     def post(self, request):

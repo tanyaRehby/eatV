@@ -1,20 +1,15 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status
 from .serializers import LoginSerializer, SignupSerializer, PlaceSerializer, LocationSerializer, ReverseGeocodeSerializer, UserSerializer
-from myapp.models import Place, User, CustomUserManager
+from myapp.models import Place, User
 import requests
 from rest_framework.views import APIView
-from django.shortcuts import render
-from django.contrib.auth import authenticate, login, get_user_model
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import get_user_model
 import json
 from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
 from .services import plan_tour
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.parsers import MultiPartParser, FormParser
 
 User = get_user_model()
 
@@ -35,6 +30,7 @@ def register(request):
 class LoginView(APIView):
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -49,6 +45,7 @@ class LoginView(APIView):
 class SignupView(APIView):
     permission_classes = [AllowAny]
     serializer_class = SignupSerializer
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         print(request.data)
@@ -60,12 +57,13 @@ class SignupView(APIView):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class GeocodeView(APIView):
     def post(self, request):
         serializer = LocationSerializer(data=request.data)
         if serializer.is_valid():
             address = serializer.validated_data['address']
-            api_key = 'AIzaSyB6dFwZLE-e9h_aoAWVXj-zOsbYe4KZaEg'  
+            api_key = 'AIzaSyB6dFwZLE-e9h_aoAWVXj-zOsbYe4KZaEg' 
             url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}'
             response = requests.get(url)
             return Response(response.json(), status=status.HTTP_200_OK)
@@ -93,10 +91,11 @@ def getPlaces(request):
 
 
 @api_view(['POST'])
-def createPlace(request):
+@parser_classes([MultiPartParser, FormParser])
+def create_place(request):
     try:
         print("Received data:", request.data)
-        serializer = PlaceSerializer(data=request.data)
+        serializer = PlaceSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             place = serializer.save()
             print("Place created successfully:", place)
@@ -107,33 +106,30 @@ def createPlace(request):
     except Exception as e:
         print("Exception occurred:", str(e))
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-class tourView(APIView):
+    
+    
+class TourView(APIView):
     def post(self, request):
+        address = request.data.get('address')
+        kosher = request.data.get('kosher', False)
+        vegan = request.data.get('vegan', False)
+        num_stops = request.data.get('num_stops', 5)
         try:
-            address = request.data.get('address')
-            kosher = request.data.get('kosher', False)
-            vegan = request.data.get('vegan', False)
-            num_stops = request.data.get('num_stops', 5)
-            try:
-                num_stops = int(num_stops)
-            except ValueError:
-                return Response({"error": "num_stops must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
-            
-            tour = plan_tour(address, kosher, vegan, num_stops)
-            
-            if tour is not None:
-                serialized_tour = [{
-                    'place_name': place.place_name,
-                    'city': place.city,
-                    'address': place.address,
-                    'food_category': place.food_category,
-                    'latitude': place.latitude,
-                    'longitude': place.longitude,
-                } for place in tour]
-                return Response(serialized_tour, status=status.HTTP_200_OK)
-            else:
-                return Response({'error': 'No suitable route found'}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            print(f"Error processing tour request: {e}")
-            return Response({"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            num_stops = int(num_stops)
+        except ValueError:
+            return Response({"error": "num_stops must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+
+        tour = plan_tour(address, kosher, vegan, num_stops)
+
+        if tour is not None:
+            serialized_tour = [{
+                'place_name': place.place_name,
+                'city': place.city,
+                'address': place.address,
+                'food_category': place.food_category,
+                'latitude': place.latitude,
+                'longitude': place.longitude,
+            } for place in tour]
+            return Response(serialized_tour, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'No suitable route found'}, status=status.HTTP_400_BAD_REQUEST)

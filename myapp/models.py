@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.core.validators import MinValueValidator, MaxValueValidator
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, full_name, password=None, **extra_fields):
@@ -43,8 +43,7 @@ class User (AbstractBaseUser, PermissionsMixin):
 
 class Place(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='places')
-    place_name = models.CharField(max_length=100)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='places', null=True, blank=True) 
     city = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
     longitude = models.FloatField(null=True, blank=True)

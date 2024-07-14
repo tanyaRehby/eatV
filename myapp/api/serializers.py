@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from myapp.models import Place, User, CustomUserManager
+from myapp.models import Place, User
 import json
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
@@ -9,9 +9,11 @@ User = get_user_model()
 
 class SignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
         fields = ['email', 'full_name', 'password', 'is_business_owner']
+
     def create(self, validated_data):
         user = User.objects.create(
             email=validated_data['email'],
@@ -21,7 +23,6 @@ class SignupSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-
 
 class PlaceSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(required=False, allow_null=True)
@@ -37,7 +38,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             address = validated_data['address']
             city = validated_data['city']
             full_address = f"{address}, {city}"
-            api_key = 'AIzaSyB6dFwZLE-e9h_aoAWVXj-zOsbYe4KZaEg'
+            api_key = 'AIzaSyB6dFwZLE-e9h_aoAWVXj-zOsbYe4KZaEg' 
             url = f'https://maps.googleapis.com/maps/api/geocode/json?address={full_address}&key={api_key}'
             response = requests.get(url)
             response_data = response.json()
@@ -45,20 +46,35 @@ class PlaceSerializer(serializers.ModelSerializer):
 
             if response_data['status'] == 'OK':
                 location = response_data['results'][0]['geometry']['location']
-                validated_data['latitude'] = float(location['lat'])
-                validated_data['longitude'] = float(location['lng'])
+                latitude = float(location['lat'])
+                longitude = float(location['lng'])
             else:
-                validated_data['latitude'] = None
-                validated_data['longitude'] = None
-
-            place = Place.objects.create(**validated_data)
+                latitude = None
+                longitude = None
+            
+            place = Place.objects.create(
+                latitude=latitude,
+                longitude=longitude,
+                place_name=validated_data['place_name'],
+                address=validated_data['address'],
+                city=validated_data['city'],
+                food_category=validated_data['food_category'],
+                is_kosher=validated_data['is_kosher'],
+                has_vegan_option=validated_data['has_vegan_option'],
+                recommended_dishes=validated_data['recommended_dishes'],
+                image=validated_data.get('image', None),
+                link=validated_data.get('link', False),
+                user=validated_data.get('user', None),
+            )
             print("Place instance created:", place)
             return place
+        
         except Exception as e:
             print("Exception in create method:", str(e))
             raise e
         
         
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -81,13 +97,6 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
-
-
-# class placeSerializer(ModelSerializer):
-#     class Meta:
-#         model = Place
-#         fields = '__all__'
-
 
 class LocationSerializer(serializers.Serializer):
     address = serializers.CharField(max_length=255)
