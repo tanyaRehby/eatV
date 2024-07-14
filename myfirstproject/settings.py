@@ -30,9 +30,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
+     'django_allauth',
+    'django_allauth.account',
+    'django_allauth.socialaccount',
 ]
 
 AUTH_USER_MODEL = 'myapp.User'
@@ -72,10 +72,9 @@ WSGI_APPLICATION = 'myfirstproject.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL')
+        default=os.getenv('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}')
     )
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
