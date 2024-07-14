@@ -9,8 +9,7 @@ import random
 gmaps= googlemaps.Client( key= 'AIzaSyAJLe6L_bHnzqC6K3YO0ET_iw7D1gmo07I' )
 
 def geocode_address(address):
-    api_key = 'AIzaSyAJLe6L_bHnzqC6K3YO0ET_iw7D1gmo07I' 
-    url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}'
+    url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={gmaps}'
     response = requests.get(url)
     if response.status_code == 200:
         response_data = response.json()
@@ -46,10 +45,7 @@ def plan_tour(user_address, kosher=False, vegan=False, num_stops=5):
     if len(filtered_places) < num_stops:
         num_stops = len(filtered_places)
     
-
-    waypoints = [f"{place.latitude},{place.longitude}" for place in filtered_places[:num_stops]]
-
-    api_key = 'AIzaSyAJLe6L_bHnzqC6K3YO0ET_iw7D1gmo07I' 
+    waypoints = [f"{place.latitude},{place.longitude}" for place in filtered_places[:num_stops]] 
     
     print(user_lat)
     print(user_lng)

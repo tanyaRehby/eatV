@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from myapp.models import Place, User, CustomUserManager
+from myapp.models import Place, User
 import json
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
@@ -37,7 +37,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             address = validated_data['address']
             city = validated_data['city']
             full_address = f"{address}, {city}"
-            api_key = 'YOUR_GOOGLE_API_KEY'
+            api_key = 'AIzaSyAJLe6L_bHnzqC6K3YO0ET_iw7D1gmo07I'
             url = f'https://maps.googleapis.com/maps/api/geocode/json?address={full_address}&key={api_key}'
             response = requests.get(url)
             response_data = response.json()
@@ -58,7 +58,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             print("Exception in create method:", str(e))
             raise e
         
-        
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -81,12 +81,6 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
-
-
-class placeSerializer(ModelSerializer):
-    class Meta:
-        model = Place
-        fields = '__all__'
 
 
 class LocationSerializer(serializers.Serializer):

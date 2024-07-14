@@ -1,35 +1,40 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status
 from .serializers import LoginSerializer, SignupSerializer, PlaceSerializer, LocationSerializer, ReverseGeocodeSerializer, UserSerializer
-from myapp.models import Place, User, CustomUserManager
+from myapp.models import Place, User
 import requests
 from rest_framework.views import APIView
 from django.shortcuts import render
-from django.contrib.auth import authenticate, login, get_user_model
-from django.http import JsonResponse
+from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 import json
 from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
 from .services import plan_tour
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 User = get_user_model()
 
-@api_view(['POST'])
-def register(request):
-    user_serializer = SignupSerializer(data=request.data)
-    place_serializer = None
-    if 'is_business_owner' in request.data and request.data['is_business_owner'] == 'True':
-        place_serializer = PlaceSerializer(data=request.data)
-    if user_serializer.is_valid() and (place_serializer is None or place_serializer.is_valid()):
-        user = user_serializer.save()
-        if place_serializer:
-            place = place_serializer.save(user=user)
-        return Response({"detail": "User registered successfully"}, status=status.HTTP_201_CREATED)
-    return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class SignupView(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = SignupSerializer
+    
+    def post(self, request, *args, **kwargs):
+        user_serializer = self.serializer_class(data=request.data)
+        place_serializer = None
+        
+        if 'is_business_owner' in request.data and request.data['is_business_owner'] == 'True':
+            place_serializer = PlaceSerializer(data=request.data)
+        
+        if user_serializer.is_valid() and (place_serializer is None or place_serializer.is_valid()):
+            user = user_serializer.save()
+            if place_serializer:
+                place = place_serializer.save(user=user)
+            return Response({
+                "user": UserSerializer(user).data,
+                "message": "Signup successful"
+            }, status=status.HTTP_201_CREATED)
+        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
@@ -45,20 +50,6 @@ class LoginView(APIView):
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class SignupView(APIView):
-    permission_classes = [AllowAny]
-    serializer_class = SignupSerializer
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-        print(request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response({
-                "user": UserSerializer(user).data,
-                "message": "Signup successful"
-            }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GeocodeView(APIView):
     def post(self, request):
@@ -108,6 +99,7 @@ def createPlace(request):
         print("Exception occurred:", str(e))
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class tourView(APIView):
     def post(self, request):
         address = request.data.get('address')
@@ -117,7 +109,7 @@ class tourView(APIView):
         try:
             num_stops = int(num_stops)
         except ValueError:
-            return Response({"error": "num_stops must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "number of stops must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
 
         tour = plan_tour(address, kosher, vegan, num_stops)
         
