@@ -30,9 +30,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django.contrib.sites',
-     'django_allauth',
-    'django_allauth.account',
-    'django_allauth.socialaccount',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
 ]
 
 AUTH_USER_MODEL = 'myapp.User'
@@ -110,6 +110,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
